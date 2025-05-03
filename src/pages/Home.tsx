@@ -9,6 +9,16 @@ import { FilterBar } from '@/components/FilterBar';
 import { studySpots } from '@/data/studySpots';
 import { StudySpot } from '@/types';
 
+// Helper function to sort spots by distance
+const sortSpotsByDistance = (spots: StudySpot[]): StudySpot[] => {
+  return [...spots].sort((a, b) => {
+    // Extract the numeric values from the distance strings
+    const distanceA = parseFloat(a.distance.replace(/[^\d.]/g, ''));
+    const distanceB = parseFloat(b.distance.replace(/[^\d.]/g, ''));
+    return distanceA - distanceB; // Sort from nearest to farthest
+  });
+};
+
 const Home = () => {
   const [filteredSpots, setFilteredSpots] = useState<StudySpot[]>(studySpots);
   const [filterOptions, setFilterOptions] = useState({
@@ -45,6 +55,9 @@ const Home = () => {
       filtered = filtered.filter(spot => spot.seatStatus === 'available');
     }
     
+    // Sort spots from nearest to farthest
+    filtered = sortSpotsByDistance(filtered);
+    
     setFilteredSpots(filtered);
   };
   
@@ -61,7 +74,9 @@ const Home = () => {
       <Header title="StudySpot" />
       
       <main className="px-4 py-3">
-        <MapView spots={filteredSpots} />
+        <div className="h-60 mb-4 rounded-xl overflow-hidden">
+          <MapView spots={filteredSpots} isHomeScreen={true} />
+        </div>
         
         <FilterBar onFilterChange={handleFilterChange} />
         

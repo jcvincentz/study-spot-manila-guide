@@ -8,14 +8,18 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 interface MapViewProps {
   spots: StudySpot[];
   selectedSpot?: string;
+  isHomeScreen?: boolean;
 }
 
 // Default Mapbox token
 const DEFAULT_MAPBOX_TOKEN = 'pk.eyJ1IjoiamN2eG5jZW50IiwiYSI6ImNtYTd4NGRmYTE3Zmwya285ZjU1cWd5azQifQ.RQ66YeooZdGAHTbxLocVtw';
 
+// Manila coordinates
+const MANILA_CENTER: [number, number] = [120.9842, 14.6091]; // Manila center coordinates
+
 // UST area coordinates
 const UST_AREA = {
-  center: [120.9866, 14.6042], // UST Main Building
+  center: [120.9866, 14.6042] as [number, number], // UST Main Building
   radius: 0.8, // km
   bounds: {
     north: 14.6092, // ~500m north of UST
@@ -95,14 +99,15 @@ const generateHeatmapData = () => {
   };
 };
 
-export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
+export const MapView = ({ spots, selectedSpot, isHomeScreen = false }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const navigate = useNavigate();
   
-  // UST area coordinates as LngLatLike type
-  const ustCenter: mapboxgl.LngLatLike = UST_AREA.center;
+  // Use Manila center for home screen, UST area for other screens
+  const defaultCenter: [number, number] = isHomeScreen ? MANILA_CENTER : UST_AREA.center;
+  const defaultZoom = isHomeScreen ? 13 : 15;
   
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -112,11 +117,11 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current!,
-      style: 'mapbox://styles/mapbox/dark-v11', // Changed to dark theme
-      center: ustCenter,
-      zoom: 15, // Increased zoom to focus on UST area
-      pitch: 30, // Add a slight angle for 3D effect
-      bearing: -15 // Slight rotation for better perspective
+      style: 'mapbox://styles/mapbox/light-v11', // Changed to light theme for white mode
+      center: defaultCenter,
+      zoom: defaultZoom,
+      pitch: isHomeScreen ? 0 : 30, // No pitch for home screen
+      bearing: isHomeScreen ? 0 : -15 // No rotation for home screen
     });
     
     // Add navigation control
@@ -128,37 +133,17 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
     // Wait for map to load before adding markers and heatmap
     map.current.on('load', () => {
       // Add heatmap layer
-      addHeatmapLayer();
+      if (!isHomeScreen) {
+        addHeatmapLayer();
+      }
       
       // Add markers for study spots
       addMarkersToMap();
       
-      // Add a 3D building layer for better visuals
-      map.current!.addLayer({
-        'id': '3d-buildings',
-        'source': 'composite',
-        'source-layer': 'building',
-        'filter': ['==', 'extrude', 'true'],
-        'type': 'fill-extrusion',
-        'minzoom': 14,
-        'paint': {
-          'fill-extrusion-color': '#aaa',
-          'fill-extrusion-height': [
-            'interpolate', ['linear'], ['zoom'],
-            14, 0,
-            16, ['get', 'height']
-          ],
-          'fill-extrusion-base': [
-            'interpolate', ['linear'], ['zoom'],
-            14, 0,
-            16, ['get', 'min_height']
-          ],
-          'fill-extrusion-opacity': 0.6
-        }
-      });
+      // No 3D buildings for cleaner map view
     });
     
-  }, [mapContainer]);
+  }, [mapContainer, isHomeScreen, defaultCenter, defaultZoom]);
   
   // Effect to handle markers when spots or selected spot changes
   useEffect(() => {
@@ -275,17 +260,19 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
         <div ref={mapContainer} className="w-full h-full rounded-xl overflow-hidden">
           {/* Map renders here */}
         </div>
-        <div className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm p-3 rounded-lg shadow-md text-xs">
-          <div className="font-medium mb-1">Study Spot Density</div>
-          <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full bg-blue-600"></span>
-            <span className="mr-2">Low</span>
-            <span className="w-3 h-3 rounded-full bg-purple-600"></span>
-            <span className="mr-2">Medium</span>
-            <span className="w-3 h-3 rounded-full bg-red-600"></span>
-            <span>High</span>
+        {!isHomeScreen && (
+          <div className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm p-3 rounded-lg shadow-md text-xs">
+            <div className="font-medium mb-1">Study Spot Density</div>
+            <div className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-blue-600"></span>
+              <span className="mr-2">Low</span>
+              <span className="w-3 h-3 rounded-full bg-purple-600"></span>
+              <span className="mr-2">Medium</span>
+              <span className="w-3 h-3 rounded-full bg-red-600"></span>
+              <span>High</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       
       <style>{`

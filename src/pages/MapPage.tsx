@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Header } from '@/components/Header';
@@ -74,7 +73,11 @@ const MapPage = () => {
           {/* Full screen map */}
           <div className="absolute inset-0">
             <div className="h-full">
-              <MapView spots={filteredSpots} selectedSpot={selectedSpot} />
+              <MapView 
+                spots={filteredSpots} 
+                selectedSpot={selectedSpot} 
+                isHomeScreen={false}
+              />
             </div>
           </div>
           
