@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -15,6 +15,20 @@ const MapPage = () => {
   const [filteredSpots, setFilteredSpots] = useState<StudySpot[]>(studySpots);
   const [showList, setShowList] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<string | undefined>(undefined);
+  
+  // Filter UST area spots by default
+  useEffect(() => {
+    // Focus on UST area spots by default
+    const ustAreaSpots = studySpots.filter(spot => 
+      spot.id === '7' || 
+      spot.id === '8' || 
+      spot.id === '9' || 
+      spot.id === '10' || 
+      spot.id === '11'
+    );
+    
+    setFilteredSpots(ustAreaSpots);
+  }, []);
   
   const handleFilterChange = (filters: any) => {
     let results = [...studySpots];
@@ -50,7 +64,7 @@ const MapPage = () => {
   return (
     <Layout includeContainer={false}>
       <div className="h-screen flex flex-col">
-        <Header title="Map" />
+        <Header title="Study Spots Map" />
         
         <div className="px-4 py-2">
           <FilterBar onFilterChange={handleFilterChange} />
