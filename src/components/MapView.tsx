@@ -10,12 +10,14 @@ interface MapViewProps {
   selectedSpot?: string;
 }
 
+// Default Mapbox token
+const DEFAULT_MAPBOX_TOKEN = 'pk.eyJ1IjoiamN2eG5jZW50IiwiYSI6ImNtYTd4NGRmYTE3Zmwya285ZjU1cWd5azQifQ.RQ66YeooZdGAHTbxLocVtw';
+
 export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const navigate = useNavigate();
-  const [mapboxToken, setMapboxToken] = useState<string>('');
   
   // Manila center coordinates as LngLatLike type
   const manilaCenter: mapboxgl.LngLatLike = [120.9842, 14.5995];
@@ -23,43 +25,32 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
     
-    // Initialize the map only once
-    const initializeMap = (token: string) => {
-      if (!token) return;
-      
-      mapboxgl.accessToken = token;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current!,
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: manilaCenter,
-        zoom: 12
-      });
-      
-      // Add navigation control
-      map.current.addControl(
-        new mapboxgl.NavigationControl({ showCompass: false }),
-        'top-right'
-      );
-      
-      // Wait for map to load before adding markers
-      map.current.on('load', () => {
-        addMarkersToMap();
-      });
-    };
+    // Initialize map with the default token
+    mapboxgl.accessToken = DEFAULT_MAPBOX_TOKEN;
     
-    // Try to get token from localStorage first
-    const storedToken = localStorage.getItem('mapboxToken');
-    if (storedToken) {
-      setMapboxToken(storedToken);
-      initializeMap(storedToken);
-    }
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current!,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: manilaCenter,
+      zoom: 12
+    });
+    
+    // Add navigation control
+    map.current.addControl(
+      new mapboxgl.NavigationControl({ showCompass: false }),
+      'top-right'
+    );
+    
+    // Wait for map to load before adding markers
+    map.current.on('load', () => {
+      addMarkersToMap();
+    });
     
   }, [mapContainer]);
   
   // Effect to handle markers when spots or selected spot changes
   useEffect(() => {
-    if (!map.current || !mapboxToken) return;
+    if (!map.current) return;
     
     // Clear existing markers when spots change
     if (map.current.loaded()) {
@@ -70,7 +61,7 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
       // Cleanup markers on component unmount
       clearMarkers();
     };
-  }, [spots, selectedSpot, mapboxToken]);
+  }, [spots, selectedSpot]);
   
   const clearMarkers = () => {
     markersRef.current.forEach(marker => marker.remove());
@@ -109,67 +100,14 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
       console.log(`Added marker for ${spot.name} at ${spot.lat}, ${spot.lng}`);
     });
   };
-  
-  const handleTokenSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!mapboxToken) return;
-    
-    localStorage.setItem('mapboxToken', mapboxToken);
-    
-    if (!map.current && mapContainer.current) {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current!,
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: manilaCenter,
-        zoom: 12
-      });
-      
-      // Add navigation control
-      map.current.addControl(
-        new mapboxgl.NavigationControl({ showCompass: false }),
-        'top-right'
-      );
-      
-      // Wait for map to load before adding markers
-      map.current.on('load', () => {
-        addMarkersToMap();
-      });
-    }
-  };
 
   return (
     <div className="relative w-full h-full">
-      {!mapboxToken || !localStorage.getItem('mapboxToken') ? (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 rounded-xl">
-          <p className="mb-4 text-sm text-muted-foreground">Enter your Mapbox token to view the map</p>
-          <form onSubmit={handleTokenSubmit} className="w-full max-w-xs space-y-2">
-            <input 
-              type="text" 
-              value={mapboxToken} 
-              onChange={(e) => setMapboxToken(e.target.value)}
-              placeholder="Enter Mapbox public token..."
-              className="w-full px-3 py-2 border rounded-lg"
-            />
-            <button 
-              type="submit" 
-              className="w-full bg-primary text-primary-foreground py-2 rounded-lg"
-            >
-              Load Map
-            </button>
-            <p className="text-xs text-muted-foreground text-center">
-              Get your token at <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-primary">mapbox.com</a>
-            </p>
-          </form>
+      <div className="w-full h-full relative">
+        <div ref={mapContainer} className="w-full h-full rounded-xl overflow-hidden">
+          {/* Map renders here */}
         </div>
-      ) : (
-        <div className="w-full h-full relative">
-          <div ref={mapContainer} className="w-full h-full rounded-xl overflow-hidden">
-            {/* Map renders here */}
-          </div>
-        </div>
-      )}
+      </div>
       
       <style>{`
         .marker-container {
