@@ -12,13 +12,17 @@ export const Header = ({ title, showBackButton = false }: HeaderProps) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border/40 px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           {showBackButton && (
             <button 
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
               className="mr-3 p-1 rounded-full hover:bg-muted transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
