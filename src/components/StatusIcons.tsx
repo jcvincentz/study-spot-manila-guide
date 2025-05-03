@@ -1,5 +1,5 @@
 
-import { Wifi, VolumeOff, Volume1, Volume2, AirVent, Plug, Chair } from "lucide-react";
+import { Wifi, VolumeOff, Volume1, Volume2, AirVent, Plug, Armchair } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WifiIconProps {
@@ -83,5 +83,5 @@ export const SeatIcon = ({ status, className }: SeatIconProps) => {
     color = "text-green-500";
   }
   
-  return <Chair className={cn("h-5 w-5", color, className)} />;
+  return <Armchair className={cn("h-5 w-5", color, className)} />;
 };

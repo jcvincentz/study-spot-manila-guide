@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { 
   Settings, Heart, Clock, Star, 
-  Wifi, VolumeOff, Plug, AirVent, Chair, 
+  Wifi, VolumeOff, Plug, AirVent, Armchair, 
   Sun, Moon
 } from 'lucide-react';
 import { StudySpotCard } from '@/components/StudySpotCard';
@@ -81,7 +81,7 @@ const Profile = () => {
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Chair className="h-5 w-5 mr-3 text-primary" />
+                  <Armchair className="h-5 w-5 mr-3 text-primary" />
                   <Label htmlFor="seat-pref">Available Seating</Label>
                 </div>
                 <Switch id="seat-pref" defaultChecked />

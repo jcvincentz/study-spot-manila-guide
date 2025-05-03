@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Wifi, VolumeOff, Plug, AirVent, Chair } from 'lucide-react';
+import { Wifi, VolumeOff, Plug, AirVent, Armchair } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
@@ -73,7 +72,7 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
           onClick={() => handleFilterToggle('ac')}
         />
         <FilterButton 
-          icon={<Chair />}
+          icon={<Armchair />}
           label="Seats"
           active={activeFilters.includes('seats')}
           onClick={() => handleFilterToggle('seats')}
