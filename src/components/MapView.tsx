@@ -17,8 +17,8 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
   const navigate = useNavigate();
   const [mapboxToken, setMapboxToken] = useState<string>('');
   
-  // Manila center coordinates
-  const manilaCenter = [120.9842, 14.5995];
+  // Manila center coordinates as LngLatLike type
+  const manilaCenter: mapboxgl.LngLatLike = [120.9842, 14.5995];
   
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -98,9 +98,10 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
         navigate(`/spot/${spot.id}`);
       });
       
-      // Create and add the marker
+      // Create and add the marker with properly typed coordinates
+      const lngLat: mapboxgl.LngLatLike = [spot.lng, spot.lat];
       const marker = new mapboxgl.Marker(el)
-        .setLngLat([spot.lng, spot.lat])
+        .setLngLat(lngLat)
         .addTo(map.current!);
       
       markersRef.current.push(marker);
@@ -170,7 +171,7 @@ export const MapView = ({ spots, selectedSpot }: MapViewProps) => {
         </div>
       )}
       
-      <style jsx>{`
+      <style>{`
         .marker-container {
           cursor: pointer;
         }
